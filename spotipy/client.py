@@ -113,7 +113,7 @@ class Spotify(object):
                     return results
                 else:
                     return None
-            except HTTPError:
+            except requests.HTTPError:
                 retries -= 1
                 status = r.status_code
                 # 429 means we hit a rate limit, backoff but try again
