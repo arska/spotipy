@@ -113,34 +113,14 @@ class Spotify(object):
                     return results
                 else:
                     return None
-            except requests.HTTPError:
-                retries -= 1
-                status = r.status_code
-                # 429 means we hit a rate limit, backoff but try again
-                # 5xx temporary server errors, try again
-                if status == 429 or (status >= 500 and status < 600):
-                    if retries < 0:
-                        # abort if too many retries
-                        raise SpotifyException(r.status_code,
-                            -1, '%s:\n %s' % (r.url, r.json()['error']['message']),
-                            headers=r.headers)
-                    else:
-                        sleep_seconds = int(r.headers.get('Retry-After', delay))
-                        print ('retrying ...' + str(sleep_seconds) + 'secs')
-                        time.sleep(sleep_seconds)
-                        delay += 1
-                        # ... and loop over the while
-                else:
-                    # other HTTP error status codes, probably permanent, give up
-                    raise SpotifyException(r.status_code,
-                        -1, '%s:\n %s' % (r.url, r.json()['error']['message']),
-                        headers=r.headers)
             except:
                 # some other exception. Requests have
                 # been know to throw a BadStatusLine exception
                 retries -= 1
                 if retries >= 0:
-                    sleep_seconds = int(e.headers.get('Retry-After', delay))
+                    sleep_seconds = int(r.headers.get('Retry-After', delay))
+                    if sleep_seconds == 0:
+                        sleep_seconds = delay
                     print ('retrying ...' + str(delay) + 'secs')
                     time.sleep(sleep_seconds)
                     delay += 1
