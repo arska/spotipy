@@ -113,7 +113,7 @@ class Spotify(object):
                     return results
                 else:
                     return None
-            except:
+            except Exception as e:
                 # some other exception. Requests have
                 # been know to throw a BadStatusLine exception
                 retries -= 1
@@ -121,15 +121,13 @@ class Spotify(object):
                     sleep_seconds = int(r.headers.get('Retry-After', delay))
                     if sleep_seconds == 0:
                         sleep_seconds = delay
-                    print ('retrying ...' + str(delay) + 'secs')
+                    print ('retrying after %s in %d secs'%(e,sleep_seconds))
                     time.sleep(sleep_seconds)
                     delay += 1
                 else:
                     raise SpotifyException(r.status_code,
                         -1, '%s:\n %s' % (r.url, r.json()['error']['message']),
                         headers=r.headers)
-            finally:
-                r.connection.close()
 
     def _get(self, url, args=None, payload=None, **kwargs):
         if args:
