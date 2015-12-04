@@ -118,10 +118,8 @@ class Spotify(object):
                 # been know to throw a BadStatusLine exception
                 retries -= 1
                 if retries >= 0:
-                    sleep_seconds = int(r.headers.get('Retry-After', delay))
-                    if sleep_seconds == 0:
-                        sleep_seconds = delay
-                    print ('retrying after %s in %d secs'%(e,sleep_seconds))
+                    sleep_seconds = max(int(r.headers.get('Retry-After', 1)),delay)
+                    print ('retrying after %s in %d secs...'%(e,sleep_seconds))
                     time.sleep(sleep_seconds)
                     delay += 1
                 else:
